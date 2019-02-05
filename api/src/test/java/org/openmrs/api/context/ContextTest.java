@@ -86,6 +86,14 @@ public class ContextTest extends BaseContextSensitiveTest {
 	}
 	
 	/**
+	 * Context#authenticate(Credentials)
+	 */
+	@Test(expected = ContextAuthenticationException.class)
+	public void authenticate_shouldNotAuthenticateWithNullCredentials() {
+		Context.authenticate(null);
+	}
+	
+	/**
 	 * @see Context#getLocale()
 	 */
 	@Test

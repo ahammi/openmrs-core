@@ -135,6 +135,8 @@ public class Context {
 	private static ContextDAO contextDAO;
 
 	private static Session mailSession;
+	
+	private static String DEFAULT_AUTH_SCHEME = "DAO";
 
 	// Using "wrapper" (Object array) around UserContext to avoid ThreadLocal
 	// bug in Java 1.5
@@ -290,6 +292,34 @@ public class Context {
 		getUserContext().authenticate(username, password, getContextDAO());
 	}
 
+	/**
+	 * Used to authenticate user through custom scheme implementation
+	 * 
+	 * @param credentials
+	 * @throws ContextAuthenticationException
+	 */
+	public static void authenticate(Credentials credentials) throws ContextAuthenticationException {
+		
+		if (credentials == null) {
+			throw new ContextAuthenticationException("Failed login attempt: credentials is null.");
+		}
+		log.debug("Authenticating with username/scheme: " + credentials.getUsername() + "/"
+		        + credentials.getAuthenticationScheme());
+		
+		if (Daemon.isDaemonThread()) {
+			log.error("Authentication attempted while operating on a "
+			        + "daemon thread, authenticating is not necessary or allowed");
+			return;
+		}
+		
+		if (credentials.getAuthenticationScheme() != null
+		        && credentials.getAuthenticationScheme().equalsIgnoreCase(DEFAULT_AUTH_SCHEME)) {
+			getUserContext().authenticate(credentials.getUsername(), credentials.getPassword(), getContextDAO());
+		} else {
+			getUserContext().authenticate(credentials, getContextDAO());
+		}
+	}
+	
 	/**
 	 * Refresh the authenticated user object in the current UserContext. This should be used when
 	 * updating information in the database about the current user and it needs to be reflecting in

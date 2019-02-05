@@ -114,6 +114,26 @@ public class UserContext implements Serializable {
 	}
 	
 	/**
+	 * @param credentials
+	 * @param contextDao
+	 * @return
+	 * @throws ContextAuthenticationException
+	 */
+	public User authenticate(Credentials credentials, ContextDAO contextDao) throws ContextAuthenticationException {
+		
+		log.debug("Authenticating with username/sheme: " + credentials.getUsername() + "/"
+		        + credentials.getAuthenticationScheme());
+		
+		this.user = credentials.authenticate(contextDao);
+		setUserLocation();
+		if (log.isDebugEnabled()) {
+			log.debug("Authenticated as: " + this.user);
+		}
+		
+		return this.user;
+	}
+	
+	/**
 	 * Refresh the authenticated user object in this UserContext. This should be used when updating
 	 * information in the database about the current user and it needs to be reflecting in the
 	 * (cached) {@link #getAuthenticatedUser()} User object.
